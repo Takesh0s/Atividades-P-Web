@@ -1,75 +1,51 @@
 const express = require('express');
+const estoque = require('./estoque');
 const app = express();
 const port = 8000;
 
 app.use(express.json());
 
-let estoque = [];
-
-const encontrarProduto = (id) => estoque.find(p => p.id === id);
-
-const removerProduto = (id) => {
-    const index = estoque.findIndex(p => p.id === id);
-    if (index !== -1) {
-        estoque.splice(index, 1);
-        return true;
-    }
-    return false;
-};
+app.get('/', (req, res) => {
+    let html =  '<h1>🧾 Sistema de Estoque</h1>';
+    html     += '<h3>Rotas disponíveis:</h3>';
+    html     += '<ul>';
+    html     += '<li>/adicionar/:id/:nome/:qtd</li>';
+    html     += '<li>/listar</li>';
+    html     += '<li>/remover/:id</li>';
+    html     += '<li>/editar/:id/:qtd</li>';
+    html     += '</ul>';
+    res.send(html);
+});
 
 app.get('/adicionar/:id/:nome/:qtd', (req, res) => {
-    const { id, nome, qtd } = req.params;
+    const item = {
+        id: req.params.id.trim(),
+        nome: req.params.nome.trim(),
+        qtd: parseInt(req.params.qtd)
+    };
 
-    if (encontrarProduto(id)) {
-        return res.send(`❌ Produto com ID '${id}' já existe.`);
-    }
-
-    const quantidade = parseInt(qtd);
-    if (isNaN(quantidade) || quantidade < 0) {
-        return res.send('❌ Quantidade inválida.');
-    }
-
-    estoque.push({
-        id: id.trim(),
-        nome: nome.trim(),
-        qtd: quantidade
-    });
-
-    res.send(`✅ Produto '${nome}' (ID: ${id}) adicionado com ${quantidade} unidades.`);
+    const resultado = estoque.adicionar(item);
+    res.send(resultado);
 });
 
 app.get('/listar', (req, res) => {
     res.json({
-        total: estoque.length,
-        produtos: estoque
+        total: estoque.listar().length,
+        produtos: estoque.listar()
     });
 });
 
 app.get('/remover/:id', (req, res) => {
-    const { id } = req.params;
-
-    if (removerProduto(id)) {
-        res.send(`✅ Produto com ID '${id}' removido com sucesso.`);
-    } else {
-        res.send(`❌ Produto com ID '${id}' não encontrado.`);
-    }
+    const resultado = estoque.remover(req.params.id.trim());
+    res.send(resultado);
 });
 
 app.get('/editar/:id/:qtd', (req, res) => {
-    const { id, qtd } = req.params;
-    const quantidade = parseInt(qtd);
+    const id = req.params.id.trim();
+    const qtd = parseInt(req.params.qtd);
 
-    if (isNaN(quantidade) || quantidade < 0) {
-        return res.send('❌ Quantidade inválida.');
-    }
-
-    const produto = encontrarProduto(id);
-    if (produto) {
-        produto.qtd = quantidade;
-        res.send(`✅ Quantidade do produto '${produto.nome}' (ID: ${id}) atualizada para ${quantidade}.`);
-    } else {
-        res.send(`❌ Produto com ID '${id}' não encontrado.`);
-    }
+    const resultado = estoque.editar(id, qtd);
+    res.send(resultado);
 });
 
 app.listen(port, () => {
