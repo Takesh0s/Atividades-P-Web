@@ -2,7 +2,7 @@ const express = require('express');
 const mustacheExpress = require('mustache-express');
 const router = require('./routers/agendamentoRouter');
 const app = express();
-const port = 3000;
+const port = 8080;
 
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
