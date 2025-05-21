@@ -8,6 +8,8 @@ function postAgendarConsulta(req, res) {
     res.render('index.html', { campos_invalidos, dados_consulta });
 }
 
+const moment = require('moment');
+
 function validarRequisicaoAgendamentoConsulta(dados_consulta) {
     let campos_invalidos = [];
 
